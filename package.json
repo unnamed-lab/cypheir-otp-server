@@ -1,0 +1,38 @@
+{
+  "name": "cypheir-otp-server",
+  "version": "1.0.0",
+  "description": "OTP generator and verification server system.",
+  "main": "./dist/server.js",
+  "module": "commonjs",
+  "scripts": {
+    "dev": "tsc -w",
+    "build": "tsc",
+    "server": "nodemon ./dist/server.js",
+    "start-ts": "ts-node src/index.ts",
+    "start": "npm run build && npm run server"
+  },
+  "keywords": [],
+  "author": "Anuoluwa S. Adebayo (Unnamed)",
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "^1.20.2",
+    "colors": "^1.4.0",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "mongoose": "^8.3.2"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/node": "^20.12.7",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.4.5"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/unnamed-lab/cypheir-otp-server.git"
+  },
+  "bugs": {
+    "url": "https://github.com/unnamed-lab/cypheir-otp-server/issues"
+  },
+  "homepage": "https://github.com/unnamed-lab/cypheir-otp-server#readme"
+}
