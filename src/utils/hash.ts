@@ -5,9 +5,9 @@ function hmac(key: string, code: string): string {
   return hash;
 }
 
-function salt(value: string, key: string) {
+function salt(value: string, key: string, base: number = 64) {
   const salt = Number(key).toString(16);
-  const hashValue = scryptSync(value, salt, 64).toString("hex");
+  const hashValue = scryptSync(value, salt, base).toString("hex");
   return hashValue;
 }
 
