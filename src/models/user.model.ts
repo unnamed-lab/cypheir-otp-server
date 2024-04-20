@@ -7,7 +7,7 @@ interface IUser {
   email: string;
   password: string;
   isAdmin: boolean;
-  plan: string;
+  plan: Types.ObjectId;
 }
 
 const userSchema = new Schema<IUser>({
@@ -17,7 +17,7 @@ const userSchema = new Schema<IUser>({
   email: { type: String, required: true },
   password: { type: String, required: true },
   isAdmin: { type: Boolean, required: true, default: true },
-  plan: { type: String },
+  plan: { type: Schema.Types.ObjectId, ref: "Plan", required: true },
 });
 
 const User = model<IUser>("User", userSchema);
