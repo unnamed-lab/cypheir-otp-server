@@ -22,8 +22,10 @@ app.listen(PORT, async (): Promise<void> => {
     } catch (error) {
       console.log("MongoDB couldn't connect :(");
       console.error(error);
+      process.exit(1)
     }
   }
+  
 });
 
 export = {};
