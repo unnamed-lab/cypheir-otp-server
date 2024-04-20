@@ -6,8 +6,17 @@ interface IPlan {
 }
 
 const planSchema = new Schema<IPlan>({
-  name: { type: String, required: true },
-  price: { type: Number, required: true, default: 0, max: 1000, min: 0 },
+  name: {
+    type: String,
+    required: true,
+  },
+  price: {
+    type: Number,
+    required: true,
+    default: 0,
+    max: 1000,
+    min: 0,
+  },
 });
 
 const Plan = model<IPlan>("Plan", planSchema);

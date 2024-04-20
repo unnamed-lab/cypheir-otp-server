@@ -6,10 +6,12 @@ interface IPackage {
 }
 
 const packageSchema = new Schema<IPackage>({
-  user: { type: Schema.Types.ObjectId, ref: "User", required: true },
-  key: {
-    type: String,
+  user: {
+    type: Schema.Types.ObjectId,
+    ref: "User",
+    required: true,
   },
+  key: { type: String },
 });
 
 const Package = model<IPackage>("Package", packageSchema);
