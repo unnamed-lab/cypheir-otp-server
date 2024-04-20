@@ -7,7 +7,7 @@ const app = express();
 const PORT = 3000;
 const API_URI = process.env.MONGODB_URI;
 
-app.use("/api/", require("./routes/codes"));
+app.use("/api/", require("./routes/otp.route"));
 
 app.listen(PORT, async (): Promise<void> => {
   console.log(`The server is running on ${PORT}`);
