@@ -7,7 +7,8 @@ const app = express();
 const PORT = 3000;
 const API_URI = process.env.MONGODB_URI;
 
-app.use("/api/", require("./routes/otp.route"));
+app.use("/api/otp/", require("./routes/otp.route"));
+app.use("/api/user/", require("./routes/user.route"));
 
 app.listen(PORT, async (): Promise<void> => {
   console.log(`The server is running on ${PORT}`);
@@ -22,10 +23,9 @@ app.listen(PORT, async (): Promise<void> => {
     } catch (error) {
       console.log("MongoDB couldn't connect :(");
       console.error(error);
-      process.exit(1)
+      process.exit(1);
     }
   }
-  
 });
 
 export = {};
