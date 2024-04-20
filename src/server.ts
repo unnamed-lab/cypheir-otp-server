@@ -12,19 +12,15 @@ app.use("/api/", require("./routes/codes"));
 app.listen(PORT, async (): Promise<void> => {
   console.log(`The server is running on ${PORT}`);
 
-  if (!API_URI) console.log("Input your MongoDB URI key");
+  if (!API_URI) throw new Error("Input your MongoDB URI key");
   else {
-    const connectDB = async () => {
-      return await mongoose.connect(API_URI);
-    };
-    const isConnected = await connectDB();
-
     try {
-      if (isConnected) {
+      const connect = await mongoose.connect(API_URI);
+      if (connect) {
         return console.log("MongoDB connected!");
       }
-      return console.log("MongoDB couldn't connect :(")
     } catch (error) {
+      console.log("MongoDB couldn't connect :(");
       console.error(error);
     }
   }
