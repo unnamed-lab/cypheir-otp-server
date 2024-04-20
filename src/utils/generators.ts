@@ -48,10 +48,10 @@ const HOTP = (
   throw new Error("The digit input is greate than the maximum (12).");
 };
 
-const CodeFuse = (option: TCodeFuse) => {
+const FuseHash = (option: TCodeFuse): string => {
   const { value, key, client } = option;
   const combo: string = `${key}:${value}:${client}`;
   return salt(combo, key, 32);
 };
 
-export = { HOTP, CodeFuse };
+export = { HOTP, FuseHash };

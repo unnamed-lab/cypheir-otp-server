@@ -1,6 +1,6 @@
 const express = require("express");
 const codeRouter = express.Router();
-const { HOTP, CodeFuse } = require("../utils/generators");
+const { HOTP, FuseHash } = require("../utils/generators");
 const { credValidator } = require("../utils/validator");
 
 codeRouter.get("/", (res: any, req: any): void => {
@@ -8,20 +8,9 @@ codeRouter.get("/", (res: any, req: any): void => {
 });
 
 codeRouter.post("/create", (res: any, req: any): void => {
-  const OTP = HOTP("unnamed", 6, { type: "alphanumeric" });
-  const key1 = CodeFuse({
-    value: "unnamed",
-    key: OTP,
-    client: "127.0.0.1",
-  });
+  const OTP = HOTP("unnamed", 6, { type: "alphanumeric" }); 
 
-  const key2 = CodeFuse({
-    value: "unnamed",
-    key: OTP,
-    client: "127.0.0.1",
-  });
-
-  const validator = credValidator(key1, key2, () => {
+  const validator = credValidator("hi", "hi", () => {
     return "Callback function works!";
   });
 
