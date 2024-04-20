@@ -1,13 +1,31 @@
-const express = require("express");
+import mongoose from "mongoose";
+import express from "express";
+
+require("dotenv").config();
 
 const app = express();
 const PORT = 3000;
+const API_URI = process.env.MONGODB_URI;
 
+app.use("/api/otp/", require("./routes/otp.route"));
+app.use("/api/user/", require("./routes/user.route"));
 
-app.use("/api/", require('./routes/codes'))
+app.listen(PORT, async (): Promise<void> => {
+  console.log(`The server is running on ${PORT}`);
 
-app.listen(PORT, (): void => {
-    console.log(`The server is running on ${PORT}`);
-})
+  if (!API_URI) throw new Error("Input your MongoDB URI key");
+  else {
+    try {
+      const connect = await mongoose.connect(API_URI);
+      if (connect) {
+        return console.log("MongoDB connected!");
+      }
+    } catch (error) {
+      console.log("MongoDB couldn't connect :(");
+      console.error(error);
+      process.exit(1);
+    }
+  }
+});
 
-export = {}
+export = {};
