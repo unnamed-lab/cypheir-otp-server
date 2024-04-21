@@ -3,6 +3,7 @@ import { Document, Schema, model } from "mongoose";
 interface IPlan extends Document {
   name: string;
   price: number;
+  isActive: boolean;
 }
 
 const planSchema = new Schema<IPlan>({
@@ -16,6 +17,11 @@ const planSchema = new Schema<IPlan>({
     default: 0,
     max: 1000,
     min: 0,
+  },
+  isActive: {
+    type: Boolean,
+    required: true,
+    default: true,
   },
 });
 

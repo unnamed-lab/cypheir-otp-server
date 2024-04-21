@@ -8,13 +8,17 @@ const app = express();
 const PORT = 3000;
 const API_URI = process.env.MONGODB_URI;
 
+//  Server Middlewares
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.raw());
 
+//  Server Routes
 app.use("/api/otp/", require("./routes/otp.route"));
 app.use("/api/user/", require("./routes/user.route"));
+app.use("/api/subscription/", require("./routes/plan.route"));
 
+//  Server Listener
 app.listen(PORT, async (): Promise<void> => {
   console.log(`The server is running on ${PORT}`);
 
