@@ -33,18 +33,23 @@ const createPlan = async (req: any, res: any): Promise<void> => {
   try {
     const hasPlan = await Plan.findOne({ name });
     if (hasPlan) return res.send("Plan already exists!");
-    await Plan.create({
-      name,
-      price,
-      perks,
-    })
-      .then((data: any) => {
-        console.log("Created new plan: " + data);
-        return res.status(200).send("Plan created successfully!");
-      })
-      .catch((error: any) => {
-        console.error(error);
-      });
+    else {
+      (
+        await Plan.create({
+          name,
+          price,
+          perks,
+        })
+      )
+        .save()
+        .then((data: any) => {
+          console.log("Created new plan: " + data);
+          return res.status(200).send("Plan created successfully!");
+        })
+        .catch((error: any) => {
+          console.error(error);
+        });
+    }
   } catch (error) {
     console.error(error);
   }
