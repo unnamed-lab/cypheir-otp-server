@@ -1,6 +1,6 @@
-import { Schema, model } from "mongoose";
+import { Document, Schema, model } from "mongoose";
 
-interface IPlan {
+interface IPlan extends Document {
   name: string;
   price: number;
 }
@@ -21,4 +21,4 @@ const planSchema = new Schema<IPlan>({
 
 const Plan = model<IPlan>("Plan", planSchema);
 
-export = { Plan };
+export = Plan;

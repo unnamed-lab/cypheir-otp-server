@@ -7,8 +7,7 @@
   "scripts": {
     "dev": "tsc -w",
     "build": "tsc",
-    "server": "nodemon ./dist/server.js",
-    "start-ts": "ts-node ./src/server.ts",
+    "start-ts": "nodemon",
     "start": "npm run build && npm run server"
   },
   "keywords": [],

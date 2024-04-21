@@ -3,11 +3,11 @@ const router = express.Router();
 const { HOTP, FuseHash } = require("../utils/generators");
 const { credValidator } = require("../utils/validator");
 
-router.get("/", (res: any, req: any): void => {
-  req.status(200).send("Response sent!");
+router.get("/", (req: any, res: any): void => {
+  res.status(200).send("Response sent!");
 });
 
-router.post("/create", (res: any, req: any): void => {
+router.post("/create", (req: any, res: any): void => {
   const OTP = HOTP("unnamed", 6, { type: "alphanumeric" });
 
   const validator = credValidator("hi", "hi", () => {
@@ -17,7 +17,7 @@ router.post("/create", (res: any, req: any): void => {
   console.log(`OTP code: ${OTP}`);
   console.log(validator);
 
-  req.status(200).send(`OTP code: ${OTP}`);
+  res.status(200).send(`OTP code: ${OTP}`);
 });
 
 export = router;

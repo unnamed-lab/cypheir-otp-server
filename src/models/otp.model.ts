@@ -1,6 +1,6 @@
-import { Schema, model, Types } from "mongoose";
+import { Schema, model, Types, Document } from "mongoose";
 
-interface IOTP {
+interface IOTP extends Document {
   package: Types.ObjectId;
   key: string;
   expiry: Schema.Types.Date;
@@ -8,8 +8,15 @@ interface IOTP {
 }
 
 const otpSchema = new Schema<IOTP>({
-  package: { type: Schema.Types.ObjectId, ref: "Package", required: true },
-  key: { type: String, required: true },
+  package: {
+    type: Schema.Types.ObjectId,
+    ref: "Package",
+    required: true,
+  },
+  key: {
+    type: String,
+    required: true,
+  },
   expiry: {
     type: Date,
     required: true,
@@ -21,4 +28,4 @@ const otpSchema = new Schema<IOTP>({
 
 const OTP = model<IOTP>("OTP", otpSchema);
 
-export = { OTP };
+export = OTP;

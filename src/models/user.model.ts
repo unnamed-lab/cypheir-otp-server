@@ -1,16 +1,16 @@
-import { Schema, Types, model } from "mongoose";
+import { Document, Schema, Types, model } from "mongoose";
 
-interface IUser {
-  username: string;
-  firstname: string;
-  lastname: string;
+export interface IUser extends Document { 
+  username?: string;
+  firstname?: string;
+  lastname?: string;
   email: string;
   password: string;
-  isAdmin: boolean;
-  plan: Types.ObjectId;
+  isAdmin?: boolean;
+  plan?: Types.ObjectId;
 }
 
-const userSchema = new Schema<IUser>({
+const userSchema = new Schema<IUser>({ 
   username: {
     type: String,
     required: true,
@@ -26,6 +26,7 @@ const userSchema = new Schema<IUser>({
   email: {
     type: String,
     required: true,
+    unique: true,
   },
   password: {
     type: String,
@@ -39,10 +40,8 @@ const userSchema = new Schema<IUser>({
   plan: {
     type: Schema.Types.ObjectId,
     ref: "Plan",
-    required: true,
+    // required: true,
   },
 });
 
-const User = model<IUser>("User", userSchema);
-
-export = { User };
+export const User = model<IUser>("User", userSchema);
