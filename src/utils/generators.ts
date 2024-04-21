@@ -54,4 +54,4 @@ const FuseHash = (option: TCodeFuse): string => {
   return salt(combo, key, 32);
 };
 
-export = { HOTP, FuseHash };
+export { HOTP, FuseHash };

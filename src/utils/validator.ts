@@ -13,4 +13,4 @@ const credValidator = (key1: string, key2: string, callback: any) => {
   }
 };
 
-export = { credValidator };
+export { credValidator };
