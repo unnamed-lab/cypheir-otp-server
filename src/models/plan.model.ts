@@ -3,7 +3,8 @@ import { Document, Schema, model } from "mongoose";
 interface IPlan extends Document {
   name: string;
   price: number;
-  isActive: boolean;
+  perks: Array<string> | string;
+  isActive?: boolean;
 }
 
 const planSchema = new Schema<IPlan>({
@@ -18,6 +19,7 @@ const planSchema = new Schema<IPlan>({
     max: 1000,
     min: 0,
   },
+  perks: { type: Schema.Types.Mixed, default: undefined },
   isActive: {
     type: Boolean,
     required: true,
