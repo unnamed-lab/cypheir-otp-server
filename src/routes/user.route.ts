@@ -11,7 +11,25 @@ router.get("/:id([0-9a-f]{24})", async (req: any, res: any): Promise<void> => {
     if (hasUser) return res.status(200).send(hasUser);
     else return res.status(200).send("User not found");
   } catch (error) {
-    console.error("Error with parameters");
+    console.error(error);
+  }
+});
+
+router.post("/get", async (req: any, res: any): Promise<void> => {
+  const { email, password } = req.body;
+
+  try {
+    await User.findOne({ email, password }, ["-_v"])
+      .then((docs) => {
+        console.log("Retrieved user data: " + docs);
+        res.status(200).send("User data fetched!");
+      })
+      .catch((err) => {
+        console.log("User not found!");
+        return console.error(err);
+      });
+  } catch (error) {
+    console.error(error);
   }
 });
 
@@ -31,14 +49,57 @@ router.post("/create", async (req: any, res: any): Promise<void> => {
   newUser
     .save()
     .then((data) => {
-      console.log(data);
-      return res.send("User created successfully!");
+      console.log("Created user: " + data);
+      return res.status(200).send("User created successfully!");
     })
     .catch((error: any) => {
       console.error(error);
     });
 });
 
-router.get("/getUser", async (req:string))
+router.post(
+  "/update/:id([0-9a-f]{24})",
+  async (req: any, res: any): Promise<void> => {
+    const { id } = req.params;
+    const { username, firstname, lastname, email, password } = req.body;
+
+    try {
+      await User.findByIdAndUpdate(id, {
+        username,
+        firstname,
+        lastname,
+        email,
+        password,
+      })
+        .then((docs) => {
+          console.log("Updated user: " + docs);
+          res.status(200).send("User updated!");
+        })
+        .catch((err) => {
+          return console.error(err);
+        });
+    } catch (error) {
+      console.error(error);
+    }
+  }
+);
+
+router.delete(
+  "/delete/:id([0-9a-f]{24})",
+  async (req: any, res: any): Promise<void> => {
+    const { id } = req.params;
+
+    try {
+      await User.findByIdAndDelete(id)
+        .then((docs) => {
+          console.log("Deleted user: " + docs);
+          res.status(200).send("User deleted!");
+        })
+        .catch((err) => {
+          return console.error(err);
+        });
+    } catch (error) {}
+  }
+);
 
 export = router;
