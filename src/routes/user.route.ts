@@ -1,9 +1,36 @@
 import express from "express";
+import jwt from "jsonwebtoken";
+import { User, IUser } from "../models/user.model";
+import { verifyUserAccess, verifyUserToken } from "../middleware/verification";
+import {
+  createUser,
+  deleteUser,
+  getUser,
+  signIn,
+  updateUser,
+} from "../controllers/user.controller";
+require("dotenv").config();
 
 const router = express.Router();
 
-router.get("/", (res:any, req:any): void => {
-    req.status(200).send("Response sent!")
-})
+router.get("/:id([0-9a-f]{24})", getUser);
+
+router.post("/login", signIn);
+
+router.post("/create", verifyUserToken, verifyUserAccess, createUser);
+
+router.post(
+  "/update/:id([0-9a-f]{24})",
+  verifyUserToken,
+  verifyUserAccess,
+  updateUser
+);
+
+router.delete(
+  "/delete/:id([0-9a-f]{24})",
+  verifyUserToken,
+  verifyUserAccess,
+  deleteUser
+);
 
 export = router;

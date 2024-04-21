@@ -11,4 +11,4 @@ function salt(value: string, key: string, base: number = 64) {
   return hashValue;
 }
 
-export = { hmac, salt };
+export { hmac, salt };

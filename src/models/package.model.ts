@@ -1,12 +1,16 @@
-import { Schema, Types, model } from "mongoose";
+import { Document, Schema, Types, model } from "mongoose";
 
-interface IPackage {
+interface IPackage extends Document {
   user: Types.ObjectId;
   key: string;
 }
 
 const packageSchema = new Schema<IPackage>({
-  user: { type: Schema.Types.ObjectId, ref: "User", required: true },
+  user: {
+    type: Schema.Types.ObjectId,
+    ref: "User",
+    required: true,
+  },
   key: {
     type: String,
   },
@@ -14,4 +18,4 @@ const packageSchema = new Schema<IPackage>({
 
 const Package = model<IPackage>("Package", packageSchema);
 
-export = { Package };
+export = Package;
