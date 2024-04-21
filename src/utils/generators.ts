@@ -9,7 +9,7 @@ type THTOPOption = {
 type TCodeFuse = {
   value: string;
   key: string | number;
-  client: string;
+  secret: string;
 };
 
 const HOTP = (
@@ -49,8 +49,8 @@ const HOTP = (
 };
 
 const FuseHash = (option: TCodeFuse): string => {
-  const { value, key, client } = option;
-  const combo: string = `${key}:${value}:${client}`;
+  const { value, key, secret } = option;
+  const combo: string = `${key}:${value}:${secret}`;
   return salt(combo, key, 32);
 };
 
