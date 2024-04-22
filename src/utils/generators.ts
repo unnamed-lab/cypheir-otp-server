@@ -22,7 +22,9 @@ const HOTP = (
 ): string => {
   if (typeof digits != "number") digits = parseInt(digits);
   if (digits <= 12) {
-    const { type, offset } = option;
+    let { type, offset } = option;
+    if (typeof type !== "string") type = "numeric";
+
     const valueOffset = offset ? offset : 0;
     const rand = Math.floor(Math.random() * (20 + valueOffset) + 1);
 
