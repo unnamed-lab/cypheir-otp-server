@@ -2,6 +2,8 @@ import express from "express";
 import jwt from "jsonwebtoken";
 import { User, IUser } from "../models/user.model";
 import { verifyUserAccess, verifyUserToken } from "../middleware/verification";
+import Package from "../models/package.model";
+import { salt } from "../utils/hash";
 require("dotenv").config();
 
 const getUser = async (req: any, res: any): Promise<void> => {
@@ -54,9 +56,19 @@ const createUser = async (req: any, res: any): Promise<void> => {
 
   newUser
     .save()
-    .then((data) => {
+    .then(async (data) => {
       console.log("Created user: " + data);
-      return res.status(200).send("User created successfully!");
+      res.status(200).send("User created successfully!");
+
+      const hashedData = salt(JSON.stringify(data), data._id);
+      (await Package.create({ user: data._id, key: hashedData }))
+        .save()
+        .then((data: any) => {
+          console.log("Package created: " + data);
+        })
+        .catch((err: any) => {
+          console.error("Failed to create pacakge");
+        });
     })
     .catch((error: any) => {
       console.error(error);
@@ -105,10 +117,4 @@ const deleteUser = async (req: any, res: any): Promise<void> => {
   } catch (error) {}
 };
 
-export {
-    getUser,
-    signIn,
-    createUser,
-    updateUser,
-    deleteUser
-}
+export { getUser, signIn, createUser, updateUser, deleteUser };

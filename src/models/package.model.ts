@@ -3,6 +3,7 @@ import { Document, Schema, Types, model } from "mongoose";
 interface IPackage extends Document {
   user: Types.ObjectId;
   key: string;
+  active: boolean;
 }
 
 const packageSchema = new Schema<IPackage>({
@@ -13,6 +14,11 @@ const packageSchema = new Schema<IPackage>({
   },
   key: {
     type: String,
+  },
+  active: {
+    type: Boolean,
+    default: true,
+    required: true,
   },
 });
 
