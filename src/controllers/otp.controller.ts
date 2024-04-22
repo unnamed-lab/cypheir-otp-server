@@ -8,7 +8,7 @@ import Package from "../models/package.model";
 require("dotenv").config();
 
 const getOTPClient = async (req: any, res: any): Promise<void> => {
-  await OTP.find({}, ["-package"])
+  await OTP.find({}, ["-package"], { sort: { _id: -1 } })
     .limit(10)
     .then((data: any) => {
       console.log(data);
@@ -23,6 +23,7 @@ const getOTPClient = async (req: any, res: any): Promise<void> => {
 const createOTP = async (req: any, res: any): Promise<void> => {
   const { key, type, digits } = req.query;
   const OTPcode = HOTP(key, digits, { type: type });
+  
   console.log(`OTP code: ${OTPcode}`);
 
   const hasedValue = salt(OTPcode, key);
@@ -56,9 +57,7 @@ const verifyOTP = async (req: any, res: any): Promise<void> => {
   if (serverKey) {
     const serverOTP = serverKey.key;
     const currentTime = new Date();
-    const utcDate = new Date(
-      currentTime.getTime() + currentTime.getTimezoneOffset() * 60000
-    ).getTime();
+    const utcDate = new Date(currentTime.getTime()).getTime();
     const serverExpiry = Number(serverKey.expiry);
 
     if (serverKey.validation) return res.status(200).send("OTP already used");
@@ -72,13 +71,14 @@ const verifyOTP = async (req: any, res: any): Promise<void> => {
         return res.status(200).send("access granted");
       });
 
-      if (!validator && serverKey.attempts > 0) {
+      if (!validator) {
+        if (serverKey.attempts === 0)
+          return res.status(403).send("OTP is no longer valid");
+
         return await OTP.findByIdAndUpdate(serverKey._id, {
           attempts: serverKey.attempts - 1,
         }).then(() => res.status(404).send("Keys do not match"));
       }
-      if (serverKey.attempts === 0)
-        return res.status(403).send("OTP is no longer valid");
 
       return validator;
     }
