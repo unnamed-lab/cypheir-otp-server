@@ -5,10 +5,9 @@ import {
   verifyOTP,
 } from "../controllers/otp.controller";
 const router = express.Router();
-const { HOTP, FuseHash } = require("../utils/generators");
-const { credValidator } = require("../utils/validator");
-
 router.get("/", getOTPClient);
+
+router.post("/verify", verifyOTP);
 
 router.post("/create", createOTP);
 

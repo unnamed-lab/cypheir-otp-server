@@ -17,7 +17,7 @@ router.get("/:id([0-9a-f]{24})", getUser);
 
 router.post("/login", signIn);
 
-router.post("/create", verifyUserToken, verifyUserAccess, createUser);
+router.post("/create", createUser);
 
 router.post(
   "/update/:id([0-9a-f]{24})",
