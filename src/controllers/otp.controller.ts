@@ -23,7 +23,7 @@ const getOTPClient = async (req: any, res: any): Promise<void> => {
 const createOTP = async (req: any, res: any): Promise<void> => {
   const { key, type, digits } = req.query;
   const OTPcode = HOTP(key, digits, { type: type });
-  
+
   console.log(`OTP code: ${OTPcode}`);
 
   const hasedValue = salt(OTPcode, key);
@@ -40,11 +40,12 @@ const createOTP = async (req: any, res: any): Promise<void> => {
   )
     .save()
     .then((data) => {
-      console.log(data._id);
-      res.status(200).send(`OTP code: ${OTPcode}`); // Send OTP to client
+      console.log(`OTP code: ${OTPcode}`);
+      const id = String(data._id);
+      res.status(200).send(id); // Send OTP to client
     })
     .catch((err) => {
-      console.log("Couldn't generate a OTP code");
+      console.log(`Couldn't generate a OTP code (${Date.now()})`);
       console.log(err);
     });
 };
@@ -60,7 +61,7 @@ const verifyOTP = async (req: any, res: any): Promise<void> => {
     const utcDate = new Date(currentTime.getTime()).getTime();
     const serverExpiry = Number(serverKey.expiry);
 
-    if (serverKey.validation) return res.status(200).send("OTP already used");
+    if (serverKey.validation) return res.status(403).send("OTP already used");
 
     if (utcDate <= serverExpiry) {
       const validator = credValidator(value, serverOTP, async () => {
@@ -83,11 +84,9 @@ const verifyOTP = async (req: any, res: any): Promise<void> => {
       return validator;
     }
 
-    console.error("OTP has expired.");
     return res.status(404).send("OTP has expired");
   }
 
-  console.error("OTP credentials not found");
   return res.status(404).send("OTP credentials not found");
 };
 
