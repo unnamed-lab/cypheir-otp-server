@@ -6,10 +6,8 @@ const credValidator = (key1: string, key2: string, callback: any) => {
     if (typeof callback !== "function")
       throw new Error("No callback function.");
 
-    if (!isValid) {
-      console.error("Keys do not match.");
-      return false;
-    }
+    if (!isValid) return false;
+
     return callback();
   } catch (error) {
     throw new Error("Validator parameter error: " + error);

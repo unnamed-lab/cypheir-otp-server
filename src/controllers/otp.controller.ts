@@ -27,9 +27,19 @@ const createOTP = async (req: any, res: any): Promise<void> => {
 
   const hasedValue = salt(OTPcode, key);
   const packageId: any = (await Package.findOne({ key }))?._id;
-  (await OTP.create({ package: packageId, key: hasedValue }))
+  const getCurrentTime = new Date().getTime() + 3 * 60 * 1000;
+  const expiryDate = new Date(getCurrentTime); //  Adds 3 mins in milliseconds
+
+  (
+    await OTP.create({
+      package: packageId,
+      key: hasedValue,
+      expiry: expiryDate,
+    })
+  )
     .save()
-    .then(() => {
+    .then((data) => {
+      console.log(data._id);
       res.status(200).send(`OTP code: ${OTPcode}`); // Send OTP to client
     })
     .catch((err) => {
@@ -41,33 +51,44 @@ const createOTP = async (req: any, res: any): Promise<void> => {
 const verifyOTP = async (req: any, res: any): Promise<void> => {
   const { otp, key } = req.query;
   const value = salt(otp, key);
-  const serverKey = await OTP.findOne({ package: key });
+  const serverKey = await OTP.findOne({ _id: key });
 
-  if (!serverKey) console.error("OTP credentials not found");
-  else {
+  if (serverKey) {
     const serverOTP = serverKey.key;
-    const currentTime = Date.now();
-    console.log(
-      "Current timestamp: " + currentTime,
-      "Expiry Time: " + serverKey.expiry
-    );
+    const currentTime = new Date();
+    const utcDate = new Date(
+      currentTime.getTime() + currentTime.getTimezoneOffset() * 60000
+    ).getTime();
+    const serverExpiry = Number(serverKey.expiry);
 
-    if (Number(serverKey.expiry) <= currentTime) {
+    if (serverKey.validation) return res.status(200).send("OTP already used");
+
+    if (utcDate <= serverExpiry) {
       const validator = credValidator(value, serverOTP, async () => {
-        await OTP.findByIdAndUpdate(serverKey._id, { validation: true });
-        return res.send("access granted");
+        await OTP.findByIdAndUpdate(serverKey._id, {
+          attempts: 0,
+          validation: true,
+        });
+        return res.status(200).send("access granted");
       });
 
-      console.log(validator);
-
       if (!validator && serverKey.attempts > 0) {
-        await OTP.findByIdAndUpdate(serverKey._id, {
+        return await OTP.findByIdAndUpdate(serverKey._id, {
           attempts: serverKey.attempts - 1,
-        });
-        return res.sendStatus(404).send("Keys do not match");
+        }).then(() => res.status(404).send("Keys do not match"));
       }
+      if (serverKey.attempts === 0)
+        return res.status(403).send("OTP is no longer valid");
+
+      return validator;
     }
+
+    console.error("OTP has expired.");
+    return res.status(404).send("OTP has expired");
   }
+
+  console.error("OTP credentials not found");
+  return res.status(404).send("OTP credentials not found");
 };
 
 export { getOTPClient, createOTP, verifyOTP };

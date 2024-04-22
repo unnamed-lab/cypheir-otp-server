@@ -7,7 +7,7 @@ import {
 const router = express.Router();
 router.get("/", getOTPClient);
 
-router.get("/verify", verifyOTP);
+router.post("/verify", verifyOTP);
 
 router.post("/create", createOTP);
 

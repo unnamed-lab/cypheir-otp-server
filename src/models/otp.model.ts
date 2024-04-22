@@ -22,7 +22,7 @@ const otpSchema = new Schema<IOTP>({
     type: Date,
     required: true,
     immutable: true, // Makes u=sure the item can bot be changed
-    default: Date.now() + 120000, // Adds 2 mins to the time
+    default: Date, // Adds 2 mins to the time
   },
   attempts: {
     type: Number,
@@ -31,7 +31,11 @@ const otpSchema = new Schema<IOTP>({
     max: 3,
     min: 0,
   },
-  validation: { type: Boolean, required: true, default: false },
+  validation: {
+    type: Boolean,
+    required: true,
+    default: false,
+  },
 });
 
 const OTP = model<IOTP>("OTP", otpSchema);
