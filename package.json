@@ -17,6 +17,7 @@
     "@types/nodemailer": "^6.4.14",
     "body-parser": "^1.20.2",
     "colors": "^1.4.0",
+    "csv": "^6.3.8",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
     "jsonwebtoken": "^9.0.2",

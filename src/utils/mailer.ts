@@ -12,19 +12,23 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-const sendMail = async (): Promise<void> => {
+const sendMail = async (
+  to: string,
+  subject: string,
+  body: string,
+  isHTML: boolean = false
+): Promise<void> => {
   const mailHost = process.env.CYPHEIR_MAIL_USER;
   try {
     const data = await transporter.sendMail({
       from: `Cypheir Mailer 🤖 <${mailHost}>`,
-      to: "adebayo.anuoluwa02@gmail.com",
-      subject: "First automated email test! 🤖",
-      text: "Hello there 😏 \nHopefully, you are having a great day than I.",
-      html: "<p><b>Hello there 😏</b> \nHopefully, you are having a great day than I.</p>",
+      to,
+      subject,
+      text: isHTML ? "" : body,
+      html: isHTML ? body : "",
     });
 
     console.log("Message sent: %s", data.messageId);
-    console.log(data);
   } catch (error) {
     console.log(error);
   }
@@ -47,21 +51,6 @@ const sendOTPMail = async (
       from: `Cypheir OTP Mail 🤖📧 <${otpHost}>`,
       to: receiver,
       subject: `${hasBrandSubject} Immediate Action Needed: Your OTP Code (${otp})`,
-      text: `Dear ${hasUsername},
-
-Thank you for using ${
-        brand ? brand : "our service"
-      }. As part of our security measures, we require a One-Time Password (OTP) to proceed with your request. Your OTP is valid for 5 minutes and is intended for a single use only.
-
-Your OTP: ${otp}
-
-Please enter this code on the verification page to continue. If you did not initiate this request, please ignore this email or contact us immediately at ${
-        support ? support : process.env.CYPHEIR_MAIL_SUPPORT
-      }.
-
-For your security, never share your OTP with anyone.
-
-Best regards, The ${brand ? brand + " Team" : "Cypheir Team"}.`,
 
       html: `
       <html lang="en">
@@ -124,4 +113,4 @@ Best regards, The ${brand ? brand + " Team" : "Cypheir Team"}.`,
   }
 };
 
-export { sendOTPMail };
+export { sendMail, sendOTPMail };
