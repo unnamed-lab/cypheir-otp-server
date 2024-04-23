@@ -25,7 +25,7 @@ const createOTP = async (req: any, res: any): Promise<void> => {
   const OTPcode = HOTP(key, digits, { type: type }); // Create OTP code
   const hasedValue = salt(OTPcode, key); // Hashes OTP with credentials
   const packageId: any = (await Package.findOne({ key }))?._id; //  Get registered user package id
-  const getCurrentTime = new Date().getTime() + 3 * 60 * 1000;
+  const getCurrentTime = new Date().getTime() + 5 * 60 * 1000;
   const expiryDate = new Date(getCurrentTime); //  Adds 3 mins in milliseconds
 
   (
