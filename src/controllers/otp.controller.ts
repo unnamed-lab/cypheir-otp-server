@@ -4,6 +4,7 @@ import { credValidator } from "../utils/validator";
 import { salt } from "../utils/hash";
 import OTP from "../models/otp.model";
 import Package from "../models/package.model";
+import { sendOTPMail } from "../utils/mailer";
 
 require("dotenv").config();
 
@@ -21,11 +22,11 @@ const getOTPClient = async (req: any, res: any): Promise<void> => {
 };
 
 const createOTP = async (req: any, res: any): Promise<void> => {
-  const { key, type, digits } = req.query;
+  const { key, type, digits, email } = req.query;
   const OTPcode = HOTP(key, digits, { type: type }); // Create OTP code
   const hasedValue = salt(OTPcode, key); // Hashes OTP with credentials
   const packageId: any = (await Package.findOne({ key }))?._id; //  Get registered user package id
-  const getCurrentTime = new Date().getTime() + 3 * 60 * 1000;
+  const getCurrentTime = new Date().getTime() + 5 * 60 * 1000;
   const expiryDate = new Date(getCurrentTime); //  Adds 3 mins in milliseconds
 
   (
@@ -37,7 +38,7 @@ const createOTP = async (req: any, res: any): Promise<void> => {
   )
     .save()
     .then((data) => {
-      console.log(`OTP code: ${OTPcode}`);
+      sendOTPMail(email, OTPcode);
       const id = String(data._id);
       res.status(200).send(id); // Send OTP to client
     })
