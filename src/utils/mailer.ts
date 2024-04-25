@@ -1,4 +1,6 @@
 import nodemailer from "nodemailer";
+import { renderCSV } from "./csvParser";
+import { Console } from "console";
 
 require("dotenv").config();
 
@@ -112,5 +114,74 @@ const sendOTPMail = async (
     console.log(error);
   }
 };
+
+const sendBulkMail = async (
+  to: string,
+  subject: string,
+  body: string,
+  csv: string,
+  isHTML: boolean = false
+): Promise<void> => {
+  try {
+    //  Start CSV Processing
+    const itemArr: [][] = await renderCSV(csv);
+    const header = itemArr[0]?.map((el: string) => {
+      return el.toLowerCase().replace(/ /g, "_");
+    });
+    const content = itemArr.slice(1);
+
+    //  Converts CSV arrays into objects
+    const csvPack = content.map((el) => {
+      const csvObj: any = {};
+      for (let i = 0; i < header.length; i++) {
+        csvObj[`${header[i]}`] = el[i];
+      }
+      return csvObj;
+    });
+    //  CSV Process completed
+
+    //  Replace HTML or body content
+    const allBody = csvPack.map((el) => {
+      const bodyProcess = body;
+
+      for (const key in el) {
+        if (Object.prototype.hasOwnProperty.call(el, key)) {
+          const regex = new RegExp(`{{${key}}}`, "g");
+          console.log(bodyProcess.replace(regex, `${el[key]}`));
+          bodyProcess.replace(regex, `${el[key]}`);
+        }
+      }
+
+      return bodyProcess;
+    });
+
+    console.log(allBody);
+  } catch (error) {
+    console.error(error);
+  }
+
+  //  Sending the message
+  // const mailHost = process.env.CYPHEIR_MAIL_USER;
+  // try {
+  //   const data = await transporter.sendMail({
+  //     from: `Cypheir Mailer 🤖 <${mailHost}>`,
+  //     to,
+  //     subject,
+  //     text: isHTML ? "" : body,
+  //     html: isHTML ? body : "",
+  //   });
+
+  //   console.log("Message sent: %s", data.messageId);
+  // } catch (error) {
+  //   console.log(error);
+  // }
+};
+
+sendBulkMail(
+  "",
+  "",
+  "I love to work in {{work_city}}, {{work_country}}",
+  "./test/example_people.csv"
+);
 
 export { sendMail, sendOTPMail };
