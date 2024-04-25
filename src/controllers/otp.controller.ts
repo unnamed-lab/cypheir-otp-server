@@ -55,7 +55,7 @@ const verifyOTP = async (req: any, res: any): Promise<void> => {
     const utcDate = new Date(currentTime.getTime()).getTime();
     const serverExpiry = Number(serverKey.expiry);
 
-    if (serverKey.validation) return res.status(201).send(`created <${key}>`);
+    if (serverKey.validation) return res.status(201).send(`validated <${key}>`);
 
     if (utcDate <= serverExpiry) {
       const validator = credValidator(value, serverOTP, async () => {

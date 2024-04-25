@@ -7,7 +7,7 @@ const readCSVFile = async (file: string): Promise<any[][]> => {
   return new Promise((resolve: any, reject: any) => {
     const readStream = fs.createReadStream(file, {
       encoding: "utf8",
-    });
+    }); // Reads local files
     const csvArr: [][] = [];
 
     readStream
