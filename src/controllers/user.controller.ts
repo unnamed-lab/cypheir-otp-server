@@ -1,7 +1,5 @@
-import express from "express";
 import jwt from "jsonwebtoken";
-import { User, IUser } from "../models/user.model";
-import { verifyUserAccess, verifyUserToken } from "../middleware/verification";
+import { User } from "../models/user.model";
 import Package from "../models/package.model";
 import { salt } from "../utils/hash";
 require("dotenv").config();

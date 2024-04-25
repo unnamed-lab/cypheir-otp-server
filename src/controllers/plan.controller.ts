@@ -1,8 +1,4 @@
-import express from "express";
-import jwt from "jsonwebtoken";
 import Plan from "../models/plan.model";
-// import { User, IUser } from "../models/user.model";
-import { verifyUserAccess, verifyUserToken } from "../middleware/verification";
 require("dotenv").config();
 
 const getPlans = async (req: any, res: any): Promise<void> => {
