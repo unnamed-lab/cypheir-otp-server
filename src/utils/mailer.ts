@@ -38,7 +38,7 @@ const sendMail = async (
   sender?: string,
   senderMail?: string,
   isHTML: boolean = false
-): Promise<void> => {
+): Promise<void | string> => {
   const mailHost = process.env.CYPHEIR_MAIL_USER;
   const senderDetail = sender ? sender : `Cypheir Mailer 🤖 <${mailHost}>`;
   try {
@@ -52,6 +52,7 @@ const sendMail = async (
     });
 
     console.log("Message sent: %s", data.messageId);
+    return data.messageId;
   } catch (error) {
     console.log(error);
   }
@@ -133,7 +134,7 @@ const sendBulkMail = async (
   sender?: string,
   senderMail?: string,
   isHTML: boolean = false
-): Promise<void> => {
+) => {
   try {
     let mailContent: string | Array<string> = "" || [];
     let toAddress: string | Array<string> = "" || [];
@@ -182,8 +183,10 @@ const sendBulkMail = async (
         return el.tsubject;
       });
 
+      const result: [] = [];
+
       for (let i = 0; i < toAddress.length; i++) {
-        sendMail(
+        const data = sendMail(
           toAddress[i],
           mailSubject[i],
           mailContent[i],
@@ -191,7 +194,11 @@ const sendBulkMail = async (
           senderMail,
           isHTML
         );
+
+        if (typeof data === "string") result.push(data);
       }
+
+      return result;
     } else if (csv && typeof csv === "object") {
       let bodyProcess = body;
       let subjectProcess = subject;
@@ -201,7 +208,7 @@ const sendBulkMail = async (
       mailContent = temp.body;
       mailSubject = temp.subject ? temp.subject : subject;
 
-      sendMail(to, mailSubject, mailContent, sender, senderMail, isHTML);
+      return sendMail(to, mailSubject, mailContent, sender, senderMail, isHTML);
     } else {
       //  Replace HTML or body content
       toAddress = to;
@@ -222,33 +229,37 @@ const sendBulkMail = async (
   }
 };
 
-const subject = "🤖 Automated: {{first_name}} Cypheir Mailing System Beta Test";
+//  TESTING AREA
 
-const msg = `
-Hi {{first_name}},
+// const subject = "🤖 Automated: {{first_name}} Cypheir Mailing System Beta Test";
 
-I hope this email finds you well! We're thrilled to have you participate in the beta testing phase of the Cypheir mailing system by Unnamed. Your feedback is invaluable as we fine-tune our platform to provide the best experience for our users.
+// const msg = `
+// Hi {{first_name}},
 
-Please find your beta testing details below:
+// I hope this email finds you well! We're thrilled to have you participate in the beta testing phase of the Cypheir mailing system by Unnamed. Your feedback is invaluable as we fine-tune our platform to provide the best experience for our users.
 
-- First Name: {{first_name}}
-- Last Name: {{last_name}}
-- Phone Number: +{{phone_number}}
-- Email: {{email}}
-- State: {{state}}
-- Country: {{country}}
+// Please find your beta testing details below:
 
-As a beta tester, you'll have exclusive access to new features, and your insights will help shape the future of Cypheir. If you encounter any issues or have suggestions, feel free to reply to this email or reach out to our support team.
+// - First Name: {{first_name}}
+// - Last Name: {{last_name}}
+// - Phone Number: +{{phone_number}}
+// - Email: {{email}}
+// - State: {{state}}
+// - Country: {{country}}
 
-Thank you for being part of our community! We look forward to hearing from you.
+// As a beta tester, you'll have exclusive access to new features, and your insights will help shape the future of Cypheir. If you encounter any issues or have suggestions, feel free to reply to this email or reach out to our support team.
 
-Best regards,
-{{first_name}} {{last_name}}
+// Thank you for being part of our community! We look forward to hearing from you.
 
-`;
+// Best regards,
+// {{first_name}} {{last_name}}
 
-sendBulkMail("", subject, msg, "./test/friends_example.csv");
+// `;
+
+// sendBulkMail("", subject, msg, "./test/friends_example.csv");
 
 // sendBulkMail("", subject, msg);
 
-export { sendMail, sendOTPMail };
+//  END TESTING
+
+export { sendMail, sendOTPMail, sendBulkMail };

@@ -1,5 +1,28 @@
-const sendMailController = (req: any, res: any) => {
-  const {} = req.query;
+import { sendMail, sendBulkMail } from "../utils/mailer";
+
+const sendMailController = async (req: any, res: any) => {
+  const { to, subject, body, sender, senderMail, isHTML } = req.query;
+
+  const result = await sendMail(to, subject, body, sender, senderMail, isHTML);
+
+  if (result) {
+    return res.status(200).send(`Message sent: ${result}`);
+  }
+
+  return res.status(400).send("Message not sent.");
 };
 
-export { sendMailController };
+const sendBulkMailController = async (req: any, res: any) => {
+  const { to, subject, body, sender, senderMail, isHTML } = req.query;
+
+  
+  const result = await sendBulkMail(to, subject, body, csv, sender, senderMail, isHTML);
+
+  if (result) {
+    return res.status(200).send(`Message sent: ${result}`);
+  }
+
+  return res.status(400).send("Message not sent.");
+};
+
+export { sendMailController, sendBulkMailController };

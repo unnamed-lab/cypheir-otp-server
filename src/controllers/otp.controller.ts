@@ -9,12 +9,12 @@ require("dotenv").config();
 
 const getOTPClient = async (req: any, res: any): Promise<void> => {
   await OTP.find({}, ["-package"], { sort: { _id: -1 } })
-    .limit(10)
+    .limit(20)
     .then((data: any) => {
       res.send(data);
     })
     .catch((error) => {
-      res.send("No OTP record found");
+      return res.status(400).send(`no OTP record found`);
     });
 };
 
@@ -24,7 +24,7 @@ const createOTP = async (req: any, res: any): Promise<void> => {
   const hasedValue = salt(OTPcode, key); // Hashes OTP with credentials
   const packageId: any = (await Package.findOne({ key }))?._id; //  Get registered user package id
   const getCurrentTime = new Date().getTime() + 5 * 60 * 1000;
-  const expiryDate = new Date(getCurrentTime); //  Adds 3 mins in milliseconds
+  const expiryDate = new Date(getCurrentTime); //  Adds 5 mins in milliseconds
 
   (
     await OTP.create({

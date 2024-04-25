@@ -1,8 +1,13 @@
 import express from "express";
-import { sendMailController } from "../controllers/mail.controller";
+import {
+  sendMailController,
+  sendBulkMailController,
+} from "../controllers/mail.controller";
 
 const router = express.Router();
 
 router.post("/send", sendMailController);
+
+router.post("/bulk", sendBulkMailController);
 
 export = router;
