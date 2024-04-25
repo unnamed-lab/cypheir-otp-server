@@ -21,15 +21,11 @@ router.post("/create", createUser);
 
 router.post(
   "/update/:id([0-9a-f]{24})",
-  verifyUserToken,
-  verifyUserAccess,
   updateUser
 );
 
 router.delete(
   "/delete/:id([0-9a-f]{24})",
-  verifyUserToken,
-  verifyUserAccess,
   deleteUser
 );
 

@@ -1,3 +1,4 @@
+import { platform } from "os";
 import Plan from "../models/plan.model";
 require("dotenv").config();
 
@@ -25,8 +26,9 @@ const getOnePlan = async (req: any, res: any): Promise<void> => {
 };
 
 const createPlan = async (req: any, res: any): Promise<void> => {
-  const { name, price, perks } = req.body;
+  const { name, price, otp, bulk, perks } = req.body;
   try {
+    const allPlans = (await Plan.find()).length;
     const hasPlan = await Plan.findOne({ name });
     if (hasPlan) return res.send("Plan already exists!");
     else {
@@ -35,6 +37,9 @@ const createPlan = async (req: any, res: any): Promise<void> => {
           name,
           price,
           perks,
+          otp,
+          bulk,
+          index: allPlans ? allPlans + 1 : 0,
         })
       )
         .save()
@@ -53,12 +58,15 @@ const createPlan = async (req: any, res: any): Promise<void> => {
 
 const updatePlan = async (req: any, res: any): Promise<void> => {
   const { id } = req.params;
-  const { name, price, perks } = req.body;
+  const { name, index, price, otp, bulk, perks } = req.body;
 
   try {
     await Plan.findByIdAndUpdate(id, {
       name,
+      index,
       price,
+      otp,
+      bulk,
       perks,
     })
       .then((docs) => {
