@@ -1,5 +1,6 @@
 import express from "express";
 import {
+  confirmOTP,
   createOTP,
   getOTPClient,
   verifyOTP,
@@ -10,5 +11,7 @@ router.get("/", getOTPClient);
 router.post("/verify", verifyOTP);
 
 router.post("/create", createOTP);
+
+router.get("/check", confirmOTP);
 
 export = router;

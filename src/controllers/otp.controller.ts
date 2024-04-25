@@ -12,11 +12,9 @@ const getOTPClient = async (req: any, res: any): Promise<void> => {
   await OTP.find({}, ["-package"], { sort: { _id: -1 } })
     .limit(10)
     .then((data: any) => {
-      console.log(data);
       res.send(data);
     })
     .catch((error) => {
-      console.error(error);
       res.send("No OTP record found");
     });
 };
@@ -43,8 +41,7 @@ const createOTP = async (req: any, res: any): Promise<void> => {
       res.status(201).send(`created <${id}>`); // Send OTP to client
     })
     .catch((err) => {
-      console.log(`Couldn't generate a OTP code (${Date.now()})`);
-      console.log(err);
+      res.status(404).send(`couldn't generate a OTP code (${Date.now()})`);
     });
 };
 
@@ -67,7 +64,7 @@ const verifyOTP = async (req: any, res: any): Promise<void> => {
           attempts: 0,
           validation: true,
         });
-        return res.status(202).send(`granted <${otpData?._id}>`);
+        return res.status(200).send(`verified <${otpData?._id}>`);
       });
 
       if (!validator) {
@@ -88,4 +85,19 @@ const verifyOTP = async (req: any, res: any): Promise<void> => {
   return res.status(406).send(`unknown <${key}>`);
 };
 
-export { getOTPClient, createOTP, verifyOTP };
+const confirmOTP = async (req: any, res: any): Promise<void> => {
+  const message: string = req.query;
+
+  const token = message?.split("%20")[1]?.slice(1, -1);
+
+  await OTP.findOne({ _id: token }).then((data) => {
+    return res
+      .status(202)
+      .send(`granted <${data?._id}>`)
+      .catch(() => {
+        res.status(404).send(`invalid <${token}>`);
+      });
+  });
+};
+
+export { getOTPClient, createOTP, verifyOTP, confirmOTP };
