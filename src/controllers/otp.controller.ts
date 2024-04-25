@@ -1,5 +1,4 @@
-import express from "express";
-import { HOTP, FuseHash } from "../utils/generators";
+import { HOTP } from "../utils/generators";
 import { credValidator } from "../utils/validator";
 import { salt } from "../utils/hash";
 import OTP from "../models/otp.model";
