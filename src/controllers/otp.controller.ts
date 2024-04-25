@@ -12,11 +12,9 @@ const getOTPClient = async (req: any, res: any): Promise<void> => {
   await OTP.find({}, ["-package"], { sort: { _id: -1 } })
     .limit(10)
     .then((data: any) => {
-      console.log(data);
       res.send(data);
     })
     .catch((error) => {
-      console.error(error);
       res.send("No OTP record found");
     });
 };
@@ -40,11 +38,10 @@ const createOTP = async (req: any, res: any): Promise<void> => {
     .then((data) => {
       sendOTPMail(email, OTPcode);
       const id = String(data._id);
-      res.status(200).send(id); // Send OTP to client
+      res.status(201).send(`created <${id}>`); // Send OTP to client
     })
     .catch((err) => {
-      console.log(`Couldn't generate a OTP code (${Date.now()})`);
-      console.log(err);
+      res.status(404).send(`couldn't generate a OTP code (${Date.now()})`);
     });
 };
 
@@ -59,33 +56,48 @@ const verifyOTP = async (req: any, res: any): Promise<void> => {
     const utcDate = new Date(currentTime.getTime()).getTime();
     const serverExpiry = Number(serverKey.expiry);
 
-    if (serverKey.validation) return res.status(403).send("OTP already used");
+    if (serverKey.validation) return res.status(201).send(`created <${key}>`);
 
     if (utcDate <= serverExpiry) {
       const validator = credValidator(value, serverOTP, async () => {
-        await OTP.findByIdAndUpdate(serverKey._id, {
+        const otpData = await OTP.findByIdAndUpdate(serverKey._id, {
           attempts: 0,
           validation: true,
         });
-        return res.status(200).send("access granted");
+        return res.status(200).send(`verified <${otpData?._id}>`);
       });
 
       if (!validator) {
         if (serverKey.attempts === 0)
-          return res.status(403).send("OTP is no longer valid");
+          return res.status(400).send(`invalid <${key}>`);
 
         return await OTP.findByIdAndUpdate(serverKey._id, {
           attempts: serverKey.attempts - 1,
-        }).then(() => res.status(404).send("Keys do not match"));
+        }).then(() => res.status(404).send(`denied <${key}>`));
       }
 
       return validator;
     }
 
-    return res.status(404).send("OTP has expired");
+    return res.status(503).send(`expired <${key}>`);
   }
 
-  return res.status(404).send("OTP credentials not found");
+  return res.status(406).send(`unknown <${key}>`);
 };
 
-export { getOTPClient, createOTP, verifyOTP };
+const confirmOTP = async (req: any, res: any): Promise<void> => {
+  const message: string = req.query;
+
+  const token = message?.split("%20")[1]?.slice(1, -1);
+
+  await OTP.findOne({ _id: token }).then((data) => {
+    return res
+      .status(202)
+      .send(`granted <${data?._id}>`)
+      .catch(() => {
+        res.status(404).send(`invalid <${token}>`);
+      });
+  });
+};
+
+export { getOTPClient, createOTP, verifyOTP, confirmOTP };

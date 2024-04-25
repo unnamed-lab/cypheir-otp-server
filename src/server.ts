@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import bodyParser from "body-parser";
 import express from "express";
+import { rateLimiterMiddleware } from "./middleware/requestLimiter";
 
 require("dotenv").config();
 
@@ -12,6 +13,7 @@ const API_URI = process.env.MONGODB_URI;
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.raw());
+// app.use(rateLimiterMiddleware)
 
 //  Server Routes
 app.use("/api/otp/", require("./routes/otp.route"));
