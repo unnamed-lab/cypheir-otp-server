@@ -42,6 +42,7 @@ const sendMail = async (
   const mailHost = process.env.CYPHEIR_MAIL_USER;
   const senderDetail = sender ? sender : `Cypheir Mailer 🤖 <${mailHost}>`;
   try {
+
     const data = await transporter.sendMail({
       sender: senderMail,
       from: senderDetail,
@@ -194,8 +195,6 @@ const sendBulkMail = async (
           senderMail,
           isHTML
         );
-
-        if (typeof data === "string") result.push(data);
       }
 
       return result;

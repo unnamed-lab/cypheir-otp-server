@@ -20,7 +20,7 @@ app.use("/api/otp/", require("./routes/otp.route"));
 app.use("/api/user/", require("./routes/user.route"));
 app.use("/api/subscription/", require("./routes/plan.route"));
 app.use("/api/package/", require("./routes/package.route"));
-app.use("/api/mail/", require("./routes/package.route"));
+app.use("/api/mail/", require("./routes/mail.route"));
 
 //  Server Listener
 app.listen(PORT, async (): Promise<void> => {
