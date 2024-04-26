@@ -3,6 +3,8 @@ import { User } from "../models/user.model";
 import Package from "../models/package.model";
 import { salt } from "../utils/hash";
 import Plan from "../models/plan.model";
+import bcrypt from "bcrypt";
+
 require("dotenv").config();
 
 const getUser = async (req: any, res: any): Promise<void> => {
@@ -20,21 +22,25 @@ const getUser = async (req: any, res: any): Promise<void> => {
 const signIn = async (req: any, res: any): Promise<void> => {
   const { email, password } = req.body;
   try {
-    await User.findOne({ email, password }, ["-_v"])
-      .then((docs) => {
-        const token = jwt.sign(
-          { data: docs },
-          String(process.env.JWT_SECRET_KEY),
-          { expiresIn: "1h" }
-        );
+    const user = await User.findOne({ email }, ["-_v"]);
 
-        const output = JSON.stringify({ data: docs, token });
-        console.log("Retrieved user data: " + output);
-        res.send("User data fetched!");
-      })
-      .catch((err) => {
-        return console.error(err);
-      });
+    if (!user) {
+      return res.status(401).json({ error: "Authentication failed" });
+    }
+    const passwordMatch = await bcrypt.compare(password, user.password);
+    if (!passwordMatch) {
+      return res.status(401).json({ error: "Authentication failed" });
+    }
+
+    const token = jwt.sign(
+      { userId: user._id },
+      String(process.env.JWT_SECRET_KEY),
+      { expiresIn: "1h" }
+    );
+
+    const output = JSON.stringify({ user, token });
+    console.log("Retrieved user data: " + output);
+    return res.send(200).send(output);
   } catch (error) {
     console.error(error);
   }
@@ -45,13 +51,16 @@ const createUser = async (req: any, res: any): Promise<void> => {
   const hasUser = await User.findOne({ email, password });
   const getPlans = await Plan.find();
 
+  const hashPassword = await bcrypt.hash(password, 10);
+
   if (hasUser) return res.send("User already exists");
+
   const newUser = await User.create({
     username,
     firstname,
     lastname,
     email,
-    password,
+    password: hashPassword,
     plan: getPlans
       ? getPlans.filter((el) => {
           return el.index === 0;
@@ -81,7 +90,9 @@ const createUser = async (req: any, res: any): Promise<void> => {
 };
 
 const updateUser = async (req: any, res: any): Promise<void> => {
-  const { id } = req.params;
+  // const { id } = req.params;
+  const id = req.user;
+
   const { username, firstname, lastname, email, password } = req.body;
   const getPlans = await Plan.find();
   const getUserPlan = (await User.findOne({ id }))?.plan;
@@ -116,12 +127,18 @@ const updateUser = async (req: any, res: any): Promise<void> => {
 };
 
 const deleteUser = async (req: any, res: any): Promise<void> => {
-  const { id } = req.params;
+  // const { id } = req.params;
+  const id = req.user;
 
   try {
     await User.findByIdAndDelete(id)
-      .then((docs) => {
+      .then(async (docs) => {
         console.log("Deleted user: " + docs);
+        const userPackage = await Package.findOneAndDelete({ user: id })
+          .then((data) => console.log("Package deleted: " + data))
+          .catch((err) => {
+            return console.error(err);
+          });
         res.status(200).send("User deleted!");
       })
       .catch((err) => {
