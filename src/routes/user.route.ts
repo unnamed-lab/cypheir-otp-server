@@ -9,6 +9,7 @@ import {
   signIn,
   updateUser,
 } from "../controllers/user.controller";
+import verifyToken from "../middleware/auth.middleware";
 require("dotenv").config();
 
 const router = express.Router();
@@ -19,14 +20,8 @@ router.post("/login", signIn);
 
 router.post("/create", createUser);
 
-router.post(
-  "/update/:id([0-9a-f]{24})",
-  updateUser
-);
+router.post("/update/:id([0-9a-f]{24})", verifyToken, updateUser);
 
-router.delete(
-  "/delete/:id([0-9a-f]{24})",
-  deleteUser
-);
+router.delete("/delete/:id([0-9a-f]{24})", verifyToken, deleteUser);
 
 export = router;
