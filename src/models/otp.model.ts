@@ -6,6 +6,7 @@ interface IOTP extends Document {
   expiry: Schema.Types.Date;
   attempts: number;
   validation: boolean;
+  created_on: Schema.Types.Date;
 }
 
 const otpSchema = new Schema<IOTP>({
@@ -21,8 +22,7 @@ const otpSchema = new Schema<IOTP>({
   expiry: {
     type: Date,
     required: true,
-    immutable: true, // Makes u=sure the item can bot be changed
-    default: Date, // Adds 2 mins to the time
+    immutable: true,
   },
   attempts: {
     type: Number,
@@ -35,6 +35,12 @@ const otpSchema = new Schema<IOTP>({
     type: Boolean,
     required: true,
     default: false,
+  },
+  created_on: {
+    type: Date,
+    required: true,
+    default: Date.now,
+    immutable: true,
   },
 });
 

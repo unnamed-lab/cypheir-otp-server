@@ -4,6 +4,8 @@ import { salt } from "../utils/hash";
 import OTP from "../models/otp.model";
 import Package from "../models/package.model";
 import { sendOTPMail } from "../utils/mailer";
+import { User } from "../models/user.model";
+import Plan from "../models/plan.model";
 
 require("dotenv").config();
 
@@ -22,26 +24,55 @@ const createOTP = async (req: any, res: any): Promise<void> => {
   const { key, type, digits, email } = req.query;
   const OTPcode = HOTP(key, digits, { type: type }); // Create OTP code
   const hasedValue = salt(OTPcode, key); // Hashes OTP with credentials
-  const packageId: any = (await Package.findOne({ key }))?._id; //  Get registered user package id
+  const packageOTP = await Package.findOne({ key });
+  const packageId = packageOTP?._id; //  Get registered user package id
   const getCurrentTime = new Date().getTime() + 5 * 60 * 1000;
   const expiryDate = new Date(getCurrentTime); //  Adds 5 mins in milliseconds
 
-  (
-    await OTP.create({
-      package: packageId,
-      key: hasedValue,
-      expiry: expiryDate,
-    })
-  )
-    .save()
-    .then((data) => {
-      sendOTPMail(email, OTPcode);
-      const id = String(data._id);
-      res.status(201).send(`created <${id}>`); // Send OTP to client
-    })
-    .catch((err) => {
-      res.status(404).send(`couldn't generate a OTP code (${Date.now()})`);
-    });
+  // Get the current date in UTC
+  const now = new Date(new Date().toUTCString());
+
+  const firstDayOfMonthUTC = new Date(
+    Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1)
+  );
+
+  const lastDayOfMonthUTC = new Date(
+    Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 0)
+  );
+
+  const getUserOTP = await OTP.find({
+    package: packageId,
+    created_on: { $gte: firstDayOfMonthUTC, $lt: lastDayOfMonthUTC },
+  });
+
+  const getUserByPackageId = await User.findOne({ _id: packageOTP?.user });
+  
+  const getUserPlanByUser = await Plan.findOne({
+    _id: getUserByPackageId?.plan,
+  });
+
+  console.log(getUserOTP.length);
+
+  if (getUserPlanByUser && getUserPlanByUser.otp >= getUserOTP.length)
+    (
+      await OTP.create({
+        package: packageId,
+        key: hasedValue,
+        expiry: expiryDate,
+      })
+    )
+      .save()
+      .then((data) => {
+        sendOTPMail(email, OTPcode);
+        const id = String(data._id);
+        res.status(201).send(`created <${id}>`); // Send OTP to client
+      })
+      .catch((err) => {
+        res.status(404).send(`couldn't generate a OTP code (${Date.now()})`);
+      });
+  else {
+    return res.status(404).send(`monthly limit reached`);
+  }
 };
 
 const verifyOTP = async (req: any, res: any): Promise<void> => {
