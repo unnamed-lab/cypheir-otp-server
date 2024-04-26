@@ -46,7 +46,7 @@ const createOTP = async (req: any, res: any): Promise<void> => {
   });
 
   const getUserByPackageId = await User.findOne({ _id: packageOTP?.user });
-  
+
   const getUserPlanByUser = await Plan.findOne({
     _id: getUserByPackageId?.plan,
   });
@@ -63,9 +63,20 @@ const createOTP = async (req: any, res: any): Promise<void> => {
     )
       .save()
       .then((data) => {
-        sendOTPMail(email, OTPcode);
         const id = String(data._id);
-        res.status(201).send(`created <${id}>`); // Send OTP to client
+
+        sendOTPMail(
+          { receiver: email, otp: OTPcode },
+          {
+            host: process.env.CYPHEIR_MAIL_HOST || "",
+            user: process.env.CYPHEIR_MAIL_USER || "",
+            pass: process.env.CYPHEIR_MAIL_PASSWORD || "",
+            port: 465,
+          },
+          () => {
+            res.status(201).send(`created <${id}>`); // Send OTP to client
+          }
+        );
       })
       .catch((err) => {
         res.status(404).send(`couldn't generate a OTP code (${Date.now()})`);
