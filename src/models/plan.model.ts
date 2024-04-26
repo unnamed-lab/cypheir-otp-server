@@ -4,6 +4,8 @@ interface IPlan extends Document {
   name: string;
   price: number;
   index: number;
+  otp: number;
+  bulk: number;
   perks: Array<string> | string;
   isActive?: boolean;
 }
@@ -26,6 +28,20 @@ const planSchema = new Schema<IPlan>({
     required: true,
     min: 0,
     max: 12,
+  },
+  otp: {
+    type: Number,
+    required: true,
+    min: 0,
+    max: 1000000,
+    default: 2000,
+  },
+  bulk: {
+    type: Number,
+    index: true,
+    required: true,
+    max: 10000000,
+    default: 5000,
   },
   perks: {
     type: Schema.Types.Mixed,

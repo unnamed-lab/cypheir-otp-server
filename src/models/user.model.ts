@@ -1,6 +1,6 @@
 import { Document, Schema, Types, model } from "mongoose";
 
-export interface IUser extends Document { 
+export interface IUser extends Document {
   username?: string;
   firstname?: string;
   lastname?: string;
@@ -10,7 +10,7 @@ export interface IUser extends Document {
   plan?: Types.ObjectId;
 }
 
-const userSchema = new Schema<IUser>({ 
+const userSchema = new Schema<IUser>({
   username: {
     type: String,
     required: true,
@@ -40,7 +40,8 @@ const userSchema = new Schema<IUser>({
   plan: {
     type: Schema.Types.ObjectId,
     ref: "Plan",
-    // required: true,
+    required: true,
+    default: undefined,
   },
 });
 

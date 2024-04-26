@@ -2,6 +2,7 @@ import jwt from "jsonwebtoken";
 import { User } from "../models/user.model";
 import Package from "../models/package.model";
 import { salt } from "../utils/hash";
+import Plan from "../models/plan.model";
 require("dotenv").config();
 
 const getUser = async (req: any, res: any): Promise<void> => {
@@ -42,6 +43,7 @@ const signIn = async (req: any, res: any): Promise<void> => {
 const createUser = async (req: any, res: any): Promise<void> => {
   const { username, firstname, lastname, email, password } = req.body;
   const hasUser = await User.findOne({ email, password });
+  const getPlans = await Plan.find();
 
   if (hasUser) return res.send("User already exists");
   const newUser = await User.create({
@@ -50,6 +52,11 @@ const createUser = async (req: any, res: any): Promise<void> => {
     lastname,
     email,
     password,
+    plan: getPlans
+      ? getPlans.filter((el) => {
+          return el.index === 0;
+        })[0]._id
+      : undefined,
   });
 
   newUser
@@ -74,12 +81,12 @@ const createUser = async (req: any, res: any): Promise<void> => {
 };
 
 const updateUser = async (req: any, res: any): Promise<void> => {
-  const { _id } = req.user;
-  console.log("User id: " + _id);
-
   const { id } = req.params;
   const { username, firstname, lastname, email, password } = req.body;
+  const getPlans = await Plan.find();
+  const getUserPlan = (await User.findOne({ id }))?.plan;
 
+  console.log(getPlans, getUserPlan);
   try {
     await User.findByIdAndUpdate(id, {
       username,
@@ -87,6 +94,14 @@ const updateUser = async (req: any, res: any): Promise<void> => {
       lastname,
       email,
       password,
+      plan:
+        getPlans.length > 0 && !getUserPlan
+          ? getPlans.filter((el) => {
+              return el.index === 0;
+            })[0]._id
+          : !getUserPlan
+          ? undefined
+          : getUserPlan,
     })
       .then((docs) => {
         console.log("Updated user: " + docs);
