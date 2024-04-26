@@ -4,15 +4,12 @@ import { Console } from "console";
 
 require("dotenv").config();
 
-const transporter = nodemailer.createTransport({
-  host: process.env.CYPHEIR_MAIL_HOST,
-  port: 465,
-  secure: true,
-  auth: {
-    user: process.env.CYPHEIR_MAIL_USER,
-    pass: process.env.CYPHEIR_MAIL_PASSWORD,
-  },
-});
+interface ICredential {
+  host: string;
+  user: string;
+  pass: string;
+  port: number;
+}
 
 const templateComplier = (obj: any, body: string, subject?: string) => {
   for (const key in obj) {
@@ -37,12 +34,28 @@ const sendMail = async (
   body: string,
   sender?: string,
   senderMail?: string,
-  isHTML: boolean = false
+  isHTML: boolean = false,
+  credentials: ICredential = {
+    host: process.env.CYPHEIR_MAIL_HOST || "",
+    user: process.env.CYPHEIR_MAIL_USER || "",
+    pass: process.env.CYPHEIR_MAIL_PASSWORD || "",
+    port: 465,
+  }
 ): Promise<void | string> => {
-  const mailHost = process.env.CYPHEIR_MAIL_USER;
-  const senderDetail = sender ? sender : `Cypheir Mailer 🤖 <${mailHost}>`;
-  try {
+  const { host, user, pass, port } = credentials;
 
+  const transporter = nodemailer.createTransport({
+    host,
+    port: 465,
+    secure: port === 465,
+    auth: {
+      user,
+      pass,
+    },
+  });
+
+  const senderDetail = sender ? sender : `Cypheir Mailer 🤖 <${user}>`;
+  try {
     const data = await transporter.sendMail({
       sender: senderMail,
       from: senderDetail,
@@ -59,21 +72,40 @@ const sendMail = async (
   }
 };
 
+interface IOTP {
+  receiver: string;
+  otp: string | number;
+  username?: string;
+  brand?: string;
+  support?: string;
+}
+
 const sendOTPMail = async (
-  receiver: string,
-  otp: string | number,
-  username?: string,
-  brand?: string,
-  support?: string,
-  host?: string
+  data: IOTP,
+  credentials: ICredential = {
+    host: process.env.CYPHEIR_MAIL_HOST || "",
+    user: process.env.CYPHEIR_MAIL_USER || "",
+    pass: process.env.CYPHEIR_MAIL_PASSWORD || "",
+    port: 465,
+  },
+  callback: unknown
 ): Promise<void> => {
-  const otpHost = host || process.env.CYPHEIR_MAIL_USER;
-  const hasBrandSubject = brand ? brand : "🤖";
-  const hasUsername = username ? username : "User";
+  const { receiver, otp, username, brand, support } = data;
+  const { host, user, pass, port } = credentials;
+
+  const transporter = nodemailer.createTransport({
+    host,
+    port,
+    secure: port === 465,
+    auth: { user, pass },
+  });
 
   try {
+    const hasBrandSubject = brand ? brand : "🤖";
+    const hasUsername = username ? username : "User";
+
     const data = await transporter.sendMail({
-      from: `Cypheir OTP Mail 🤖📧 <${otpHost}>`,
+      from: `Cypheir OTP Mail 🤖📧 <${user}>`,
       to: receiver,
       subject: `${hasBrandSubject} Immediate Action Needed: Your OTP Code (${otp})`,
 
@@ -121,7 +153,10 @@ const sendOTPMail = async (
 </html>`,
     });
 
-    console.log("Message sent: %s", data.messageId);
+    if (data && typeof callback === "function") {
+      console.log("Message sent: %s", data.messageId);
+      callback();
+    }
   } catch (error) {
     console.log(error);
   }
@@ -227,38 +262,5 @@ const sendBulkMail = async (
     console.error(error);
   }
 };
-
-//  TESTING AREA
-
-// const subject = "🤖 Automated: {{first_name}} Cypheir Mailing System Beta Test";
-
-// const msg = `
-// Hi {{first_name}},
-
-// I hope this email finds you well! We're thrilled to have you participate in the beta testing phase of the Cypheir mailing system by Unnamed. Your feedback is invaluable as we fine-tune our platform to provide the best experience for our users.
-
-// Please find your beta testing details below:
-
-// - First Name: {{first_name}}
-// - Last Name: {{last_name}}
-// - Phone Number: +{{phone_number}}
-// - Email: {{email}}
-// - State: {{state}}
-// - Country: {{country}}
-
-// As a beta tester, you'll have exclusive access to new features, and your insights will help shape the future of Cypheir. If you encounter any issues or have suggestions, feel free to reply to this email or reach out to our support team.
-
-// Thank you for being part of our community! We look forward to hearing from you.
-
-// Best regards,
-// {{first_name}} {{last_name}}
-
-// `;
-
-// sendBulkMail("", subject, msg, "./test/friends_example.csv");
-
-// sendBulkMail("", subject, msg);
-
-//  END TESTING
 
 export { sendMail, sendOTPMail, sendBulkMail };
