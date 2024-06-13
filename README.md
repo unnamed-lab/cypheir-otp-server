@@ -1,4 +1,4 @@
-# Cypheir Mail Server
+# Cypheir One-Time Passcode Server
 
 ## Introduction
 
@@ -20,11 +20,6 @@ This OTP generator is designed with a focus on security, reliability, and ease o
 - Express.js
 - MongoDB
 
-## Features
-
-- Secure mail transfer
-- Efficient handling of large volumes of mail
-- User-friendly interface
 
 ## Contributing
 
