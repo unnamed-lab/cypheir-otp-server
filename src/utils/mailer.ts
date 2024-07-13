@@ -19,7 +19,7 @@ const templateComplier = (obj: any, body: string, subject?: string) => {
     ) {
       const regex = new RegExp(`{{${key}}}`, "g");
       body = body.replace(regex, obj[key]);
-      subject ? (subject = subject.replace(regex, obj[key])) : undefined;
+      const newSubject = subject ? (subject = subject.replace(regex, obj[key])) : undefined;
     }
   }
 
@@ -36,9 +36,9 @@ const sendMail = async (
   senderMail?: string,
   isHTML: boolean = false,
   credentials: ICredential = {
-    host: process.env.CYPHEIR_MAIL_HOST || "",
-    user: process.env.CYPHEIR_MAIL_USER || "",
-    pass: process.env.CYPHEIR_MAIL_PASSWORD || "",
+    host: process.env.CYPHEIR_MAIL_HOST as string,
+    user: process.env.CYPHEIR_MAIL_USER as string,
+    pass: process.env.CYPHEIR_MAIL_PASSWORD as string,
     port: 465,
   }
 ): Promise<void | string> => {
@@ -83,9 +83,9 @@ interface IOTP {
 const sendOTPMail = async (
   data: IOTP,
   credentials: ICredential = {
-    host: process.env.CYPHEIR_MAIL_HOST || "",
-    user: process.env.CYPHEIR_MAIL_USER || "",
-    pass: process.env.CYPHEIR_MAIL_PASSWORD || "",
+    host: process.env.CYPHEIR_MAIL_HOST as string,
+    user: process.env.CYPHEIR_MAIL_USER as string,
+    pass: process.env.CYPHEIR_MAIL_PASSWORD as string,
     port: 465,
   },
   callback: unknown
@@ -172,9 +172,9 @@ const sendBulkMail = async (
   isHTML: boolean = false
 ) => {
   try {
-    let mailContent: string | Array<string> = "" || [];
-    let toAddress: string | Array<string> = "" || [];
-    let mailSubject: string | Array<string> = "" || [];
+    let mailContent: string | Array<string>;
+    let toAddress: string | Array<string>=[];
+    let mailSubject: string | Array<string>=[];
 
     if (csv && typeof csv === "string") {
       //  Start CSV Processing
@@ -189,8 +189,10 @@ const sendBulkMail = async (
         const csvObj: any = {};
         for (let i = 0; i < header.length; i++) {
           csvObj[header[i]] = el[i];
-          if (header[i] === "email" || header[i] === "work_email")
-            typeof toAddress !== "string" ? toAddress.push(el[i]) : "";
+          if (header[i] === "email" || header[i] === "work_email") {
+            const newitem =
+              typeof toAddress !== "string" ? toAddress.push(el[i]) : "";
+          }
         }
         return csvObj;
       });
