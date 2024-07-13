@@ -1,3 +1,4 @@
+import Express from "express";
 import jwt from "jsonwebtoken";
 import { User } from "../models/user.model";
 import Package from "../models/package.model";
@@ -7,29 +8,46 @@ import bcrypt from "bcrypt";
 
 require("dotenv").config();
 
-const getUser = async (req: any, res: any): Promise<void> => {
+export interface IGetUserAuthInfoRequest extends Express.Request {
+  user: string;
+}
+
+const getUser = async (
+  req: Express.Request,
+  res: Express.Response
+): Promise<void> => {
   const { id } = req.params;
   try {
     const hasUser = await User.findById(String(id));
 
-    if (hasUser) return res.status(200).send(hasUser);
-    else return res.status(200).send("User not found");
+    if (hasUser) {
+      res.status(200).send(hasUser);
+      return;
+    } else {
+      res.status(200).send("User not found");
+      return;
+    }
   } catch (error) {
     console.error(error);
   }
 };
 
-const signIn = async (req: any, res: any): Promise<void> => {
+const signIn = async (
+  req: Express.Request,
+  res: Express.Response
+): Promise<void> => {
   const { email, password } = req.body;
   try {
     const user = await User.findOne({ email }, ["-_v"]);
 
     if (!user) {
-      return res.status(401).json({ error: "Authentication failed" });
+      res.status(401).json({ error: "Authentication failed" });
+      return;
     }
     const passwordMatch = await bcrypt.compare(password, user.password);
     if (!passwordMatch) {
-      return res.status(401).json({ error: "Authentication failed" });
+      res.status(401).json({ error: "Authentication failed" });
+      return;
     }
 
     const token = jwt.sign(
@@ -40,20 +58,27 @@ const signIn = async (req: any, res: any): Promise<void> => {
 
     const output = JSON.stringify({ user, token });
     console.log("Retrieved user data: " + output);
-    return res.send(200).send(output);
+    res.send(200).send(output);
+    return;
   } catch (error) {
     console.error(error);
   }
 };
 
-const createUser = async (req: any, res: any): Promise<void> => {
+const createUser = async (
+  req: Express.Request,
+  res: Express.Response
+): Promise<void> => {
   const { username, firstname, lastname, email, password } = req.body;
   const hasUser = await User.findOne({ email, password });
   const getPlans = await Plan.find();
 
   const hashPassword = await bcrypt.hash(password, 10);
 
-  if (hasUser) return res.send("User already exists");
+  if (hasUser) {
+    res.send("User already exists");
+    return;
+  }
 
   const newUser = await User.create({
     username,
@@ -74,22 +99,25 @@ const createUser = async (req: any, res: any): Promise<void> => {
       console.log("Created user: " + data);
       res.status(200).send("User created successfully!");
 
-      const hashedData = salt(JSON.stringify(data), data._id);
+      const hashedData = salt(JSON.stringify(data), <string>data?._id);
       (await Package.create({ user: data._id, key: hashedData }))
         .save()
-        .then((data: any) => {
+        .then((data) => {
           console.log("Package created: " + data);
         })
-        .catch((err: any) => {
-          console.error("Failed to create pacakge");
+        .catch((err) => {
+          console.error("Failed to create pacakge: ", err);
         });
     })
-    .catch((error: any) => {
+    .catch((error) => {
       console.error(error);
     });
 };
 
-const updateUser = async (req: any, res: any): Promise<void> => {
+const updateUser = async (
+  req: any,
+  res: any
+): Promise<void> => {
   // const { id } = req.params;
   const id = req.user;
 
@@ -126,7 +154,10 @@ const updateUser = async (req: any, res: any): Promise<void> => {
   }
 };
 
-const deleteUser = async (req: any, res: any): Promise<void> => {
+const deleteUser = async (
+  req: any,
+  res: any
+): Promise<void> => {
   // const { id } = req.params;
   const id = req.user;
 
@@ -134,7 +165,7 @@ const deleteUser = async (req: any, res: any): Promise<void> => {
     await User.findByIdAndDelete(id)
       .then(async (docs) => {
         console.log("Deleted user: " + docs);
-        const userPackage = await Package.findOneAndDelete({ user: id })
+        await Package.findOneAndDelete({ user: id })
           .then((data) => console.log("Package deleted: " + data))
           .catch((err) => {
             return console.error(err);
@@ -144,7 +175,9 @@ const deleteUser = async (req: any, res: any): Promise<void> => {
       .catch((err) => {
         return console.error(err);
       });
-  } catch (error) {}
+  } catch (error) {
+    console.error(error);
+  }
 };
 
 export { getUser, signIn, createUser, updateUser, deleteUser };

@@ -1,7 +1,8 @@
+import Express  from "express";
 import Package from "../models/package.model";
 import { hmac } from "../utils/hash";
 
-const getUserPackage = async (req: any, res: any): Promise<void> => {
+const getUserPackage = async (req: Express.Request, res: Express.Response): Promise<void> => {
   const { id } = req.params;
   try {
     await Package.findById(id)
@@ -18,7 +19,7 @@ const getUserPackage = async (req: any, res: any): Promise<void> => {
   }
 };
 
-const getAllPackages = async (req: any, res: any): Promise<void> => {
+const getAllPackages = async (req: Express.Request, res: Express.Response): Promise<void> => {
   try {
     await Package.find().then((data) => {
       console.log("Package data: ", data);
@@ -29,7 +30,7 @@ const getAllPackages = async (req: any, res: any): Promise<void> => {
   }
 };
 
-const createtUserPackage = async (req: any, res: any): Promise<void> => {
+const createtUserPackage = async (req: Express.Request, res: Express.Response): Promise<void> => {
   const { user } = req.body;
   const timestamp = new Date().toUTCString();
 
@@ -37,11 +38,11 @@ const createtUserPackage = async (req: any, res: any): Promise<void> => {
     const key = hmac(user, timestamp);
     (await Package.create({ user, key }))
       .save()
-      .then((data: any) => {
+      .then(data => {
         console.log("Created package: " + data);
         return res.status(200).send("Package created successfully!");
       })
-      .catch((error: any) => {
+      .catch(error => {
         console.error(error);
       });
   } catch (error) {
@@ -49,7 +50,7 @@ const createtUserPackage = async (req: any, res: any): Promise<void> => {
   }
 };
 
-const deleteUserPackage = async (req: any, res: any): Promise<void> => {
+const deleteUserPackage = async (req: Express.Request, res: Express.Response): Promise<void> => {
   const { id } = req.params;
   try {
     await Package.findByIdAndDelete(id)

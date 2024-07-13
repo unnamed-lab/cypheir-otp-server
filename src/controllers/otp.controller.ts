@@ -1,3 +1,4 @@
+import Express from "express";
 import { HOTP } from "../utils/generators";
 import { credValidator } from "../utils/validator";
 import { salt } from "../utils/hash";
@@ -9,21 +10,29 @@ import Plan from "../models/plan.model";
 
 require("dotenv").config();
 
-const getOTPClient = async (req: any, res: any): Promise<void> => {
+const getOTPClient = async (
+  req: Express.Request,
+  res: Express.Response
+): Promise<void> => {
   await OTP.find({}, ["-package"], { sort: { _id: -1 } })
     .limit(20)
-    .then((data: any) => {
+    .then(data => {
       res.send(data);
     })
-    .catch((error) => {
+    .catch(() => {
       return res.status(400).send(`no OTP record found`);
     });
 };
 
-const createOTP = async (req: any, res: any): Promise<void> => {
+const createOTP = async (
+  req: Express.Request,
+  res: Express.Response
+): Promise<void> => {
   const { key, type, digits, email } = req.query;
-  const OTPcode = HOTP(key, digits, { type: type }); // Create OTP code
-  const hasedValue = salt(OTPcode, key); // Hashes OTP with credentials
+  const OTPcode = HOTP(key as string, digits as string, {
+    type: type as "numeric" | "alphanumeric",
+  }); // Create OTP code
+  const hasedValue = salt(OTPcode, key as string); // Hashes OTP with credentials
   const packageOTP = await Package.findOne({ key });
   const packageId = packageOTP?._id; //  Get registered user package id
   const getCurrentTime = new Date().getTime() + 5 * 60 * 1000;
@@ -66,11 +75,11 @@ const createOTP = async (req: any, res: any): Promise<void> => {
         const id = String(data._id);
 
         sendOTPMail(
-          { receiver: email, otp: OTPcode },
+          { receiver: email as string, otp: OTPcode },
           {
-            host: process.env.CYPHEIR_MAIL_HOST || "",
-            user: process.env.CYPHEIR_MAIL_USER || "",
-            pass: process.env.CYPHEIR_MAIL_PASSWORD || "",
+            host: process.env.CYPHEIR_MAIL_HOST as string,
+            user: process.env.CYPHEIR_MAIL_USER as string,
+            pass: process.env.CYPHEIR_MAIL_PASSWORD as string,
             port: 465,
           },
           () => {
@@ -78,17 +87,21 @@ const createOTP = async (req: any, res: any): Promise<void> => {
           }
         );
       })
-      .catch((err) => {
+      .catch(() => {
         res.status(404).send(`couldn't generate a OTP code (${Date.now()})`);
       });
   else {
-    return res.status(404).send(`monthly limit reached`);
+    res.status(404).send(`monthly limit reached`);
+    return;
   }
 };
 
-const verifyOTP = async (req: any, res: any): Promise<void> => {
+const verifyOTP = async (
+  req: Express.Request,
+  res: Express.Response
+): Promise<void> => {
   const { otp, key } = req.query;
-  const value = salt(otp, key);
+  const value = salt(otp as string, key as string);
   const serverKey = await OTP.findOne({ _id: key });
 
   if (serverKey) {
@@ -97,7 +110,10 @@ const verifyOTP = async (req: any, res: any): Promise<void> => {
     const utcDate = new Date(currentTime.getTime()).getTime();
     const serverExpiry = Number(serverKey.expiry);
 
-    if (serverKey.validation) return res.status(201).send(`validated <${key}>`);
+    if (serverKey.validation) {
+      res.status(201).send(`validated <${key}>`);
+      return;
+    }
 
     if (utcDate <= serverExpiry) {
       const validator = credValidator(value, serverOTP, async () => {
@@ -109,35 +125,43 @@ const verifyOTP = async (req: any, res: any): Promise<void> => {
       });
 
       if (!validator) {
-        if (serverKey.attempts === 0)
-          return res.status(400).send(`invalid <${key}>`);
+        if (serverKey.attempts === 0) {
+          res.status(400).send(`invalid <${key}>`);
+          return;
+        }
 
-        return await OTP.findByIdAndUpdate(serverKey._id, {
+        await OTP.findByIdAndUpdate(serverKey._id, {
           attempts: serverKey.attempts - 1,
         }).then(() => res.status(404).send(`denied <${key}>`));
+        return;
       }
 
       return validator;
     }
 
-    return res.status(503).send(`expired <${key}>`);
+    res.status(503).send(`expired <${key}>`);
+    return;
   }
 
-  return res.status(406).send(`unknown <${key}>`);
+  res.status(406).send(`unknown <${key}>`);
+  return;
 };
 
-const confirmOTP = async (req: any, res: any): Promise<void> => {
-  const message: string = req.query;
-
-  const token = message?.split("%20")[1]?.slice(1, -1);
+const confirmOTP = async (
+  req: any,
+  res: any
+): Promise<void> => {
+  const message = req.query;
+  const token = (message as unknown as string)?.split("%20")[1]?.slice(1, -1);
 
   await OTP.findOne({ _id: token }).then((data) => {
-    return res
+    res
       .status(202)
       .send(`granted <${data?._id}>`)
       .catch(() => {
         res.status(404).send(`invalid <${token}>`);
       });
+    return;
   });
 };
 

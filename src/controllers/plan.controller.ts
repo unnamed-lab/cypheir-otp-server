@@ -1,8 +1,11 @@
-import { platform } from "os";
+import Express from "express";
 import Plan from "../models/plan.model";
 require("dotenv").config();
 
-const getPlans = async (req: any, res: any): Promise<void> => {
+const getPlans = async (
+  req: Express.Request,
+  res: Express.Response
+): Promise<void> => {
   try {
     await Plan.find().then((data) => {
       console.log(data);
@@ -13,7 +16,10 @@ const getPlans = async (req: any, res: any): Promise<void> => {
   }
 };
 
-const getOnePlan = async (req: any, res: any): Promise<void> => {
+const getOnePlan = async (
+  req: Express.Request,
+  res: Express.Response
+): Promise<void> => {
   const { id } = req.params;
   try {
     await Plan.findById(id).then((data) => {
@@ -25,13 +31,18 @@ const getOnePlan = async (req: any, res: any): Promise<void> => {
   }
 };
 
-const createPlan = async (req: any, res: any): Promise<void> => {
+const createPlan = async (
+  req: Express.Request,
+  res: Express.Response
+): Promise<void> => {
   const { name, price, otp, bulk, perks } = req.body;
   try {
     const allPlans = (await Plan.find()).length;
     const hasPlan = await Plan.findOne({ name });
-    if (hasPlan) return res.send("Plan already exists!");
-    else {
+    if (hasPlan) {
+      res.send("Plan already exists!");
+      return;
+    } else {
       (
         await Plan.create({
           name,
@@ -43,11 +54,11 @@ const createPlan = async (req: any, res: any): Promise<void> => {
         })
       )
         .save()
-        .then((data: any) => {
+        .then(data => {
           console.log("Created new plan: " + data);
           return res.status(200).send("Plan created successfully!");
         })
-        .catch((error: any) => {
+        .catch(error=> {
           console.error(error);
         });
     }
@@ -56,7 +67,10 @@ const createPlan = async (req: any, res: any): Promise<void> => {
   }
 };
 
-const updatePlan = async (req: any, res: any): Promise<void> => {
+const updatePlan = async (
+  req: Express.Request,
+  res: Express.Response
+): Promise<void> => {
   const { id } = req.params;
   const { name, index, price, otp, bulk, perks } = req.body;
 
@@ -81,7 +95,10 @@ const updatePlan = async (req: any, res: any): Promise<void> => {
   }
 };
 
-const deletePlan = async (req: any, res: any): Promise<void> => {
+const deletePlan = async (
+  req: Express.Request,
+  res: Express.Response
+): Promise<void> => {
   const { id } = req.params;
 
   try {

@@ -1,7 +1,16 @@
+import Express from "express";
 import jwt from "jsonwebtoken";
 require("dotenv").config();
 
-function verifyToken(req: any, res: any, next: any) {
+export interface IGetUserAuthInfoRequest extends Express.Request {
+  user: string;
+}
+
+export function verifyToken(
+  req: any,
+  res: any,
+  next: Express.NextFunction
+) {
   const token = req.header("Authorization");
   const secret = process.env.JWT_SECRET_KEY as string;
 
@@ -17,8 +26,6 @@ function verifyToken(req: any, res: any, next: any) {
       next();
     }
   } catch (error) {
-    res.status(401).json({ error: "Invalid token" });
+    res.status(401).json({ error: "Invalid token: " + error });
   }
 }
-
-export = verifyToken;

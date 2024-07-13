@@ -4,7 +4,7 @@ import * as csv from "csv";
 // File path: "./test/example_people.csv"
 
 const readCSVFile = async (file: string): Promise<any[][]> => {
-  return new Promise((resolve: any, reject: any) => {
+  return new Promise((resolve, reject) => {
     const readStream = fs.createReadStream(file, {
       encoding: "utf8",
     }); // Reads local files
@@ -20,11 +20,11 @@ const readCSVFile = async (file: string): Promise<any[][]> => {
           }
         })
       )
-      .on("data", (data: any) => {
+      .on("data", data => {
         csvArr.push(data);
       })
       .on("end", () => resolve(csvArr))
-      .on("error", (error: any) => reject(error));
+      .on("error", error => reject(error));
   });
 };
 
