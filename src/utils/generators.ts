@@ -1,4 +1,3 @@
-const { createHmac } = require("crypto");
 const { hmac, salt } = require("./hash");
 
 type THTOPOption = {
@@ -22,9 +21,8 @@ const HOTP = (
 ): string => {
   if (typeof digits != "number") digits = parseInt(digits);
   if (digits <= 12) {
-    let { type, offset } = option;
-    if (typeof type !== "string") type = "numeric";
-
+    const { type } = option;
+    const offset = option?.offset;
     const valueOffset = offset ? offset : 0;
     const rand = Math.floor(Math.random() * (20 + valueOffset) + 1);
 

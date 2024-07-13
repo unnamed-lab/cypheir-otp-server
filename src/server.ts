@@ -1,7 +1,6 @@
 import mongoose from "mongoose";
 import bodyParser from "body-parser";
 import express from "express";
-import { rateLimiterMiddleware } from "./middleware/requestLimiter";
 
 require("dotenv").config();
 

@@ -1,8 +1,11 @@
+import Express  from "express";
 import { sendMail, sendBulkMail } from "../utils/mailer";
 
-const sendMailController = async (req: any, res: any) => {
+const sendMailController = async (
+  req: Express.Request,
+  res: Express.Response
+) => {
   const { to, subject, body, sender, senderMail, isHTML } = req.body;
-
 
   console.log(to, subject, body, sender, senderMail, isHTML);
 
@@ -15,7 +18,10 @@ const sendMailController = async (req: any, res: any) => {
   return res.status(400).send("Message not sent.");
 };
 
-const sendBulkMailController = async (req: any, res: any) => {
+const sendBulkMailController = async (
+  req: Express.Request,
+  res: Express.Response
+) => {
   const { to, subject, body, csv, sender, senderMail, isHTML } = req.body;
 
   const result = await sendBulkMail(

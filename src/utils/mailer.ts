@@ -1,6 +1,5 @@
 import nodemailer from "nodemailer";
 import { renderCSV } from "./csvParser";
-import { Console } from "console";
 
 require("dotenv").config();
 
@@ -20,6 +19,7 @@ const templateComplier = (obj: any, body: string, subject?: string) => {
       const regex = new RegExp(`{{${key}}}`, "g");
       body = body.replace(regex, obj[key]);
       const newSubject = subject ? (subject = subject.replace(regex, obj[key])) : undefined;
+      console.log(newSubject)
     }
   }
 
@@ -192,6 +192,7 @@ const sendBulkMail = async (
           if (header[i] === "email" || header[i] === "work_email") {
             const newitem =
               typeof toAddress !== "string" ? toAddress.push(el[i]) : "";
+              console.log(newitem)
           }
         }
         return csvObj;
@@ -201,8 +202,8 @@ const sendBulkMail = async (
       //  Replace HTML or body content
       const templates = csvPack.map(
         (el): { tbody: string; tsubject: string } => {
-          let bodyProcess = body;
-          let subjectProcess = subject;
+          const bodyProcess = body;
+          const subjectProcess = subject;
 
           const temp = templateComplier(el, bodyProcess, subjectProcess);
 
@@ -232,12 +233,13 @@ const sendBulkMail = async (
           senderMail,
           isHTML
         );
+        console.info(data)
       }
 
       return result;
     } else if (csv && typeof csv === "object") {
-      let bodyProcess = body;
-      let subjectProcess = subject;
+      const bodyProcess = body;
+      const subjectProcess = subject;
 
       const temp = templateComplier(csv, bodyProcess, subjectProcess);
 

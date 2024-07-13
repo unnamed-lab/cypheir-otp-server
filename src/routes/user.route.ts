@@ -1,7 +1,4 @@
 import express from "express";
-import jwt from "jsonwebtoken";
-import { User, IUser } from "../models/user.model";
-import { verifyUserAccess, verifyUserToken } from "../middleware/verification";
 import {
   createUser,
   deleteUser,
@@ -9,7 +6,7 @@ import {
   signIn,
   updateUser,
 } from "../controllers/user.controller";
-import verifyToken from "../middleware/auth.middleware";
+import { verifyToken } from "../middleware/auth.middleware";
 require("dotenv").config();
 
 const router = express.Router();

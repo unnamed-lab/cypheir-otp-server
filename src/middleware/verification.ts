@@ -1,9 +1,19 @@
+import Express from "express";
 import jwt from "jsonwebtoken";
 require("dotenv").config();
 
-function verifyUserToken(req: any, res: any, next: any) {
-  const bearerHeader = req.header["authorization"];
-  
+export interface IGetTokenInfoRequest extends Express.Request {
+  user: string;
+  token: string;
+}
+
+function verifyUserToken(
+  req: IGetTokenInfoRequest,
+  res: Express.Response,
+  next: any
+) {
+  const bearerHeader = (req.header as Record<string, any>)["authorization"];
+
   if (typeof bearerHeader !== "undefined") {
     const bearer = bearerHeader.split(" ");
     const bearToken = bearer[1];
@@ -14,7 +24,11 @@ function verifyUserToken(req: any, res: any, next: any) {
   }
 }
 
-function verifyUserAccess(req: any, res: any, next: any) {
+function verifyUserAccess(
+  req: any,
+  res: any,
+  next: Express.NextFunction
+) {
   jwt.verify(
     req.token,
     String(process.env.JWT_SECRET_KEY),
